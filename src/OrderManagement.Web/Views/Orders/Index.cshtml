@@ -1,0 +1,217 @@
+@model OrderIndexViewModel
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Orders</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+        + New Order
+    </button>
+</div>
+
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @message
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div id="ajax-alert-placeholder"></div>
+
+<form method="get" asp-action="Index" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label mb-0" for="statusFilter">Status</label>
+        <select id="statusFilter" name="status" class="form-select" asp-for="StatusFilter"
+                asp-items="Html.GetEnumSelectList<OrderStatus>()">
+            <option value="">All statuses</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label mb-0" for="customerFilter">Customer</label>
+        <input id="customerFilter" name="customerName" class="form-control"
+               value="@Model.CustomerNameFilter" placeholder="Search by customer" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Clear</a>
+    </div>
+</form>
+
+<div id="order-table-container"
+     data-url="@Url.Action("OrderTable")"
+     data-status="@(Model.StatusFilter?.ToString() ?? "")"
+     data-customer="@(Model.CustomerNameFilter ?? "")">
+    <partial name="_OrderTable" model="Model.Orders" />
+</div>
+
+<!-- Create Order modal (jQuery AJAX POST — no full page reload) -->
+<div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="createOrderForm" asp-action="Create" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createOrderModalLabel">Create Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="createOrderErrors" class="alert alert-danger d-none"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="createCustomerName">Customer Name</label>
+                            <input id="createCustomerName" name="CustomerName" class="form-control" maxlength="100" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="createOrderDate">Order Date</label>
+                            <input id="createOrderDate" name="OrderDate" type="date" class="form-control"
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="createStatus">Status</label>
+                            <select id="createStatus" name="Status" class="form-select"
+                                    asp-items="Html.GetEnumSelectList<OrderStatus>()"></select>
+                        </div>
+                    </div>
+
+                    <h6>Line Items</h6>
+                    <table class="table table-sm align-middle" id="createItemsTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th style="width: 120px;">Quantity</th>
+                                <th style="width: 150px;">Unit Price</th>
+                                <th style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="addItemRow">+ Add item</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var itemIndex = 0;
+
+            function addItemRow() {
+                var i = itemIndex++;
+                var row =
+                    '<tr>' +
+                    '<td><input type="hidden" name="Items.Index" value="' + i + '" />' +
+                    '<input name="Items[' + i + '].ProductName" class="form-control form-control-sm" maxlength="100" /></td>' +
+                    '<td><input name="Items[' + i + '].Quantity" type="number" min="1" value="1" class="form-control form-control-sm" /></td>' +
+                    '<td><input name="Items[' + i + '].UnitPrice" type="number" min="0.01" step="0.01" class="form-control form-control-sm" /></td>' +
+                    '<td><button type="button" class="btn btn-sm btn-outline-danger remove-item">&times;</button></td>' +
+                    '</tr>';
+                $('#createItemsTable tbody').append(row);
+            }
+
+            function resetCreateForm() {
+                var form = $('#createOrderForm')[0];
+                form.reset();
+                $('#createItemsTable tbody').empty();
+                $('#createOrderErrors').addClass('d-none').empty();
+                $('#createOrderForm .is-invalid').removeClass('is-invalid');
+                itemIndex = 0;
+                addItemRow();
+            }
+
+            // Basic client-side validation: highlight empty/invalid required fields.
+            function validateCreateForm() {
+                var valid = true;
+                $('#createOrderForm .is-invalid').removeClass('is-invalid');
+
+                var customer = $('#createCustomerName');
+                if (!customer.val().trim()) {
+                    customer.addClass('is-invalid');
+                    valid = false;
+                }
+
+                $('#createItemsTable tbody tr').each(function () {
+                    var product = $(this).find('input[name$=".ProductName"]');
+                    var quantity = $(this).find('input[name$=".Quantity"]');
+                    var price = $(this).find('input[name$=".UnitPrice"]');
+
+                    if (!product.val().trim()) { product.addClass('is-invalid'); valid = false; }
+                    if (!(parseInt(quantity.val(), 10) > 0)) { quantity.addClass('is-invalid'); valid = false; }
+                    if (!(parseFloat(price.val()) > 0)) { price.addClass('is-invalid'); valid = false; }
+                });
+
+                return valid;
+            }
+
+            function showErrors(errors) {
+                var messages = [];
+                $.each(errors, function (_, fieldErrors) {
+                    $.each(fieldErrors, function (_, msg) { messages.push(msg); });
+                });
+                $('#createOrderErrors')
+                    .removeClass('d-none')
+                    .html(messages.map(function (m) { return '<div>' + m + '</div>'; }).join(''));
+            }
+
+            function reloadOrderTable() {
+                var container = $('#order-table-container');
+                var url = container.data('url');
+                container.load(url, {
+                    status: container.data('status'),
+                    customerName: container.data('customer')
+                });
+            }
+
+            $('#addItemRow').on('click', addItemRow);
+
+            $('#createItemsTable').on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+            });
+
+            $('#createOrderModal').on('show.bs.modal', resetCreateForm);
+
+            $('#createOrderForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (!validateCreateForm()) {
+                    $('#createOrderErrors')
+                        .removeClass('d-none')
+                        .text('Please fix the highlighted fields.');
+                    return;
+                }
+
+                var form = $(this);
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('createOrderModal')).hide();
+                            $('#ajax-alert-placeholder').html(
+                                '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                'Order #' + response.orderId + ' was created.' +
+                                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                '</div>');
+                            reloadOrderTable();
+                        } else {
+                            showErrors(response.errors);
+                        }
+                    },
+                    error: function () {
+                        $('#createOrderErrors')
+                            .removeClass('d-none')
+                            .text('Something went wrong while saving the order. Please try again.');
+                    }
+                });
+            });
+        })();
+    </script>
+}

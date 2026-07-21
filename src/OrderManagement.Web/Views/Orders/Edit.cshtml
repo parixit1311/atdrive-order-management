@@ -1,0 +1,115 @@
+@model OrderFormViewModel
+@{
+    ViewData["Title"] = $"Edit Order #{Model.OrderId}";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Orders</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Order #@Model.OrderId</li>
+    </ol>
+</nav>
+
+<h1 class="h3 mb-3">Edit Order #@Model.OrderId</h1>
+
+<form asp-action="Edit" method="post" id="editOrderForm">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+    <input type="hidden" asp-for="OrderId" />
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <label asp-for="CustomerName" class="form-label"></label>
+            <input asp-for="CustomerName" class="form-control" />
+            <span asp-validation-for="CustomerName" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="OrderDate" class="form-label"></label>
+            <input asp-for="OrderDate" class="form-control" />
+            <span asp-validation-for="OrderDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<OrderStatus>()"></select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+    </div>
+
+    <h2 class="h5">Line Items</h2>
+    <span asp-validation-for="Items" class="text-danger d-block mb-2"></span>
+    <table class="table table-sm align-middle" id="editItemsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th style="width: 130px;">Quantity</th>
+                <th style="width: 160px;">Unit Price</th>
+                <th style="width: 60px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Items.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <input type="hidden" name="Items.Index" value="@i" />
+                        <input type="hidden" asp-for="Items[i].OrderItemId" />
+                        <input asp-for="Items[i].ProductName" class="form-control form-control-sm" />
+                        <span asp-validation-for="Items[i].ProductName" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input asp-for="Items[i].Quantity" class="form-control form-control-sm" />
+                        <span asp-validation-for="Items[i].Quantity" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <input asp-for="Items[i].UnitPrice" class="form-control form-control-sm" />
+                        <span asp-validation-for="Items[i].UnitPrice" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item">&times;</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="addEditItemRow">+ Add item</button>
+
+    <div>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var itemIndex = @Model.Items.Count;
+
+            $('#addEditItemRow').on('click', function () {
+                var i = itemIndex++;
+                var row =
+                    '<tr>' +
+                    '<td><input type="hidden" name="Items.Index" value="' + i + '" />' +
+                    '<input type="hidden" name="Items[' + i + '].OrderItemId" value="0" />' +
+                    '<input name="Items[' + i + '].ProductName" class="form-control form-control-sm" maxlength="100" ' +
+                    'data-val="true" data-val-required="Product name is required." /></td>' +
+                    '<td><input name="Items[' + i + '].Quantity" type="number" min="1" value="1" class="form-control form-control-sm" ' +
+                    'data-val="true" data-val-range="Quantity must be a positive number." data-val-range-min="1" data-val-range-max="2147483647" /></td>' +
+                    '<td><input name="Items[' + i + '].UnitPrice" type="number" min="0.01" step="0.01" class="form-control form-control-sm" ' +
+                    'data-val="true" data-val-range="Unit price must be a positive amount." data-val-range-min="0.01" data-val-range-max="999999999" /></td>' +
+                    '<td><button type="button" class="btn btn-sm btn-outline-danger remove-item">&times;</button></td>' +
+                    '</tr>';
+                var tbody = $('#editItemsTable tbody');
+                tbody.append(row);
+
+                // Re-parse so jquery.validate picks up the new inputs.
+                var form = $('#editOrderForm');
+                form.removeData('validator').removeData('unobtrusiveValidation');
+                $.validator.unobtrusive.parse(form);
+            });
+
+            $('#editItemsTable').on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+            });
+        })();
+    </script>
+}
