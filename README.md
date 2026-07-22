@@ -27,13 +27,15 @@ Controllers  →  Services (business logic)  →  Repositories (EF Core)  →  S
   - `Repositories/` — `OrderRepository`: EF Core queries incl. `Include()` eager loading and the `GetOrdersByStatus` stored procedure via `FromSqlInterpolated`
   - `Data/` — `OrderDbContext`, migrations, and seed data
 - `tests/OrderManagement.Tests` — xUnit tests for the service layer
+- `Database/AtDriveOrders.sql` — the full schema and stored procedure as a plain SQL script
+  (for review or manual setup; the app creates everything automatically, so running it is optional)
 
 ## Feature checklist (vs. the brief)
 
 | Requirement | Where |
 |---|---|
 | Layered Controller → Service → Repository | `Controllers/`, `Services/`, `Repositories/` |
-| Orders + OrderItems tables (FK, cascade delete) | `Data/OrderDbContext.cs`, `Migrations/` |
+| Orders + OrderItems tables (FK, cascade delete) | `Data/OrderDbContext.cs`, `Migrations/`, `Database/AtDriveOrders.sql` |
 | Index page with Create / Edit / Delete | `Views/Orders/Index.cshtml` |
 | CRUD via EF Core + Razor views | `OrdersController`, `Views/Orders/` |
 | Eager loading of line items | `OrderRepository.GetByIdAsync` (`.Include(o => o.Items)`) |
