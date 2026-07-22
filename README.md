@@ -96,19 +96,4 @@ authorization on one action, not a full identity provider.)
 dotnet test
 ```
 
-## Notes & decisions
 
-- **Stored procedure + `Include()`**: EF can't compose `Include()` onto a stored-procedure
-  query, so `GetByStatusAsync` loads the matching orders via the proc and stitches the line
-  items on with one extra query.
-- **Update semantics**: editing an order reconciles line items — removed rows are deleted,
-  existing rows updated, new rows inserted — in a single `SaveChanges`.
-- **AJAX create**: the modal posts the serialized form (anti-forgery token included); on
-  success the order table is refreshed via a partial view request, so the page never reloads.
-- **Status** is stored as a string (`nvarchar(20)`) for readability in the database and in
-  the stored procedure's `WHERE` clause.
-- **Schema from SQL, mapping from EF**: the database objects and seed data live in
-  `Database/AtDriveOrders.sql` (executed batch-by-batch at startup, since `GO` is a client
-  batch separator rather than T-SQL). `OrderDbContext.OnModelCreating` does not create
-  anything — it only maps the entities onto the existing tables (enum-as-string status,
-  decimal precision, relationship), which EF needs to query and save correctly.
