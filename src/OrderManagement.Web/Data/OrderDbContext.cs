@@ -3,6 +3,12 @@ using OrderManagement.Web.Models;
 
 namespace OrderManagement.Web.Data;
 
+/// <summary>
+/// EF Core mapping for the AtDriveOrders database. The schema itself is
+/// created by Database/AtDriveOrders.sql — the configuration below only
+/// tells EF how the entities map onto those existing tables (column sizes,
+/// the Status enum stored as a string, decimal precision, relationships).
+/// </summary>
 public class OrderDbContext : DbContext
 {
     public OrderDbContext(DbContextOptions<OrderDbContext> options) : base(options)

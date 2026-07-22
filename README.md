@@ -6,7 +6,7 @@ orders with line items. Built for the AtDrive ASP.NET developer coding test.
 ## Tech stack
 
 - ASP.NET Core 8 MVC with Razor views
-- Entity Framework Core 8 (SQL Server) with code-first migrations
+- Entity Framework Core 8 (SQL Server) for data access; schema and seed data from a plain SQL script
 - SQL Server LocalDB by default (any SQL Server works — just change the connection string)
 - jQuery / AJAX for the create-order modal
 - Cookie authentication for the secured Delete action
@@ -25,17 +25,17 @@ Controllers  →  Services (business logic)  →  Repositories (EF Core)  →  S
   - `Controllers/` — `OrdersController` (CRUD + AJAX create + stored-proc filter), `AccountController` (demo sign-in), `HomeController` (error pages)
   - `Services/` — `OrderService`: order mapping, item reconciliation on update, and the LINQ total calculation (`Items.Sum(i => i.Quantity * i.UnitPrice)`)
   - `Repositories/` — `OrderRepository`: EF Core queries incl. `Include()` eager loading and the `GetOrdersByStatus` stored procedure via `FromSqlInterpolated`
-  - `Data/` — `OrderDbContext`, migrations, and seed data
+  - `Data/` — `OrderDbContext` (EF entity-to-table mapping) and `DbInitializer` (runs the SQL script at startup)
+  - `Database/AtDriveOrders.sql` — the single source of truth for the schema: both tables,
+    the `GetOrdersByStatus` stored procedure, and the seed data, all as plain idempotent T-SQL
 - `tests/OrderManagement.Tests` — xUnit tests for the service layer
-- `Database/AtDriveOrders.sql` — the full schema and stored procedure as a plain SQL script
-  (for review or manual setup; the app creates everything automatically, so running it is optional)
 
 ## Feature checklist (vs. the brief)
 
 | Requirement | Where |
 |---|---|
 | Layered Controller → Service → Repository | `Controllers/`, `Services/`, `Repositories/` |
-| Orders + OrderItems tables (FK, cascade delete) | `Data/OrderDbContext.cs`, `Migrations/`, `Database/AtDriveOrders.sql` |
+| Orders + OrderItems tables (FK, cascade delete) | `Database/AtDriveOrders.sql` (+ EF mapping in `Data/OrderDbContext.cs`) |
 | Index page with Create / Edit / Delete | `Views/Orders/Index.cshtml` |
 | CRUD via EF Core + Razor views | `OrdersController`, `Views/Orders/` |
 | Eager loading of line items | `OrderRepository.GetByIdAsync` (`.Include(o => o.Items)`) |
@@ -65,9 +65,11 @@ Then open the URL shown in the console (e.g. https://localhost:7xxx).
 
 ### Database setup
 
-None required. On first run the app applies the EF Core migrations (creating the
-`AtDriveOrders` database, both tables, and the `GetOrdersByStatus` stored procedure)
-and seeds ten sample orders.
+None required. On startup the app creates the empty `AtDriveOrders` database if it
+doesn't exist, then executes `Database/AtDriveOrders.sql`, which creates both tables,
+the `GetOrdersByStatus` stored procedure, and ten seeded sample orders. The script is
+idempotent, so restarts are safe; you can also run it manually against an empty
+database if you prefer.
 
 Using a different SQL Server instance? Edit `ConnectionStrings:DefaultConnection` in
 `src/OrderManagement.Web/appsettings.json`, e.g.:
@@ -104,3 +106,8 @@ dotnet test
   success the order table is refreshed via a partial view request, so the page never reloads.
 - **Status** is stored as a string (`nvarchar(20)`) for readability in the database and in
   the stored procedure's `WHERE` clause.
+- **Schema from SQL, mapping from EF**: the database objects and seed data live in
+  `Database/AtDriveOrders.sql` (executed batch-by-batch at startup, since `GO` is a client
+  batch separator rather than T-SQL). `OrderDbContext.OnModelCreating` does not create
+  anything — it only maps the entities onto the existing tables (enum-as-string status,
+  decimal precision, relationship), which EF needs to query and save correctly.
