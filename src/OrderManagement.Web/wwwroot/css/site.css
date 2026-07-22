@@ -19,4 +19,25 @@ html {
 
 body {
   margin-bottom: 60px;
+  background-color: #f6fbfe;
+}
+
+/* Light sky blue header */
+.navbar-atdrive {
+  background-color: #cbe9f9;
+}
+
+.navbar-atdrive .navbar-brand {
+  font-weight: 600;
+  color: #17516e;
+}
+
+/* Light blue table headers to match the navbar */
+.table > thead {
+  --bs-table-bg: #e4f4fc;
+  --bs-table-color: #17516e;
+}
+
+.footer {
+  background-color: #eef7fc;
 }

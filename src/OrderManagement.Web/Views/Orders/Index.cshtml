@@ -5,9 +5,19 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">Orders</h1>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
-        + New Order
-    </button>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+            + New Order
+        </button>
+    }
+    else
+    {
+        <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login"
+           asp-route-returnUrl="@Url.Action("Index", "Orders")" title="Sign in to create orders">
+            Sign in to create orders
+        </a>
+    }
 </div>
 
 @if (TempData["Message"] is string message)
@@ -46,7 +56,9 @@
     <partial name="_OrderTable" model="Model.Orders" />
 </div>
 
-<!-- Create Order modal (jQuery AJAX POST — no full page reload) -->
+<!-- Create Order modal (jQuery AJAX POST — no full page reload); creating requires sign-in -->
+@if (User.Identity?.IsAuthenticated == true)
+{
 <div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -97,6 +109,7 @@
         </div>
     </div>
 </div>
+}
 
 @section Scripts {
     <script>

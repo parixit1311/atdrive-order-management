@@ -47,6 +47,7 @@ public class OrdersController : Controller
         return View(order);
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(OrderFormViewModel form)
@@ -67,6 +68,7 @@ public class OrdersController : Controller
         return Json(new { success = true, orderId = order.OrderId });
     }
 
+    [Authorize]
     public async Task<IActionResult> Edit(int id)
     {
         var order = await _orderService.GetOrderAsync(id);
@@ -95,6 +97,7 @@ public class OrdersController : Controller
         return View(form);
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(OrderFormViewModel form)

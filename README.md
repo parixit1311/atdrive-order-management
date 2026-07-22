@@ -42,7 +42,7 @@ Controllers  →  Services (business logic)  →  Repositories (EF Core)  →  S
 | Stored procedure filter | `dbo.GetOrdersByStatus`, called from `OrderRepository.GetByStatusAsync` |
 | Server-side validation | Data annotations on view models + `ModelState` checks |
 | Friendly error handling | 404 "order not found" view, global error page, no stack traces outside Development |
-| `[Authorize]` on Delete | `OrdersController.Delete` + cookie auth |
+| `[Authorize]` on write actions | `OrdersController` Create / Edit / Delete + cookie auth (viewing is public) |
 | Unit tests | `tests/OrderManagement.Tests/OrderServiceTests.cs` (5 tests) |
 | Bonus: search / filter | Status dropdown (stored proc) + customer name search on Index |
 | Bonus: client-side validation | Highlighted invalid fields in the create modal; unobtrusive validation on Edit |
@@ -65,7 +65,7 @@ Then open the URL shown in the console (e.g. https://localhost:7xxx).
 
 None required. On first run the app applies the EF Core migrations (creating the
 `AtDriveOrders` database, both tables, and the `GetOrdersByStatus` stored procedure)
-and seeds three sample orders.
+and seeds ten sample orders.
 
 Using a different SQL Server instance? Edit `ConnectionStrings:DefaultConnection` in
 `src/OrderManagement.Web/appsettings.json`, e.g.:
@@ -74,9 +74,10 @@ Using a different SQL Server instance? Edit `ConnectionStrings:DefaultConnection
 Server=.\SQLEXPRESS;Database=AtDriveOrders;Trusted_Connection=True;TrustServerCertificate=True
 ```
 
-### Signing in (for Delete)
+### Signing in (for Create / Edit / Delete)
 
-Deleting an order requires authentication (`[Authorize]`). Use the demo account:
+Anyone can browse and view orders, but creating, editing, or deleting an order
+requires authentication (`[Authorize]`). Use the demo account:
 
 - Username: `admin`
 - Password: `Admin@123`

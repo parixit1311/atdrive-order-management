@@ -18,34 +18,110 @@ public static class DbInitializer
         {
             new()
             {
-                CustomerName = "Alice Johnson",
-                OrderDate = DateTime.Today.AddDays(-10),
+                CustomerName = "Lionel Messi",
+                OrderDate = DateTime.Today.AddDays(-28),
                 Status = OrderStatus.Completed,
                 Items =
                 {
-                    new OrderItem { ProductName = "Wireless Mouse", Quantity = 2, UnitPrice = 24.99m },
-                    new OrderItem { ProductName = "USB-C Hub", Quantity = 1, UnitPrice = 45.50m }
+                    new OrderItem { ProductName = "Home Jersey", Quantity = 2, UnitPrice = 89.99m },
+                    new OrderItem { ProductName = "Captain's Armband", Quantity = 1, UnitPrice = 14.50m }
                 }
             },
             new()
             {
-                CustomerName = "Bob Martinez",
-                OrderDate = DateTime.Today.AddDays(-3),
+                CustomerName = "Cristiano Ronaldo",
+                OrderDate = DateTime.Today.AddDays(-24),
+                Status = OrderStatus.Completed,
+                Items =
+                {
+                    new OrderItem { ProductName = "Football Boots", Quantity = 1, UnitPrice = 219.00m },
+                    new OrderItem { ProductName = "Training Bibs", Quantity = 5, UnitPrice = 9.99m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Neymar Jr",
+                OrderDate = DateTime.Today.AddDays(-21),
+                Status = OrderStatus.Cancelled,
+                Items =
+                {
+                    new OrderItem { ProductName = "Away Jersey", Quantity = 3, UnitPrice = 84.99m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Kylian Mbappe",
+                OrderDate = DateTime.Today.AddDays(-16),
+                Status = OrderStatus.Shipped,
+                Items =
+                {
+                    new OrderItem { ProductName = "Match Ball", Quantity = 4, UnitPrice = 39.99m },
+                    new OrderItem { ProductName = "Shin Guards", Quantity = 2, UnitPrice = 19.95m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Erling Haaland",
+                OrderDate = DateTime.Today.AddDays(-13),
                 Status = OrderStatus.Processing,
                 Items =
                 {
-                    new OrderItem { ProductName = "Mechanical Keyboard", Quantity = 1, UnitPrice = 89.00m }
+                    new OrderItem { ProductName = "Goalkeeper Gloves", Quantity = 1, UnitPrice = 54.00m },
+                    new OrderItem { ProductName = "Water Bottle", Quantity = 6, UnitPrice = 7.25m }
                 }
             },
             new()
             {
-                CustomerName = "Charlotte Lee",
+                CustomerName = "Jude Bellingham",
+                OrderDate = DateTime.Today.AddDays(-10),
+                Status = OrderStatus.Pending,
+                Items =
+                {
+                    new OrderItem { ProductName = "Training Cones (Set of 20)", Quantity = 2, UnitPrice = 24.99m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Vinicius Junior",
+                OrderDate = DateTime.Today.AddDays(-8),
+                Status = OrderStatus.Shipped,
+                Items =
+                {
+                    new OrderItem { ProductName = "Home Jersey", Quantity = 1, UnitPrice = 89.99m },
+                    new OrderItem { ProductName = "Team Scarf", Quantity = 2, UnitPrice = 16.50m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Lamine Yamal",
+                OrderDate = DateTime.Today.AddDays(-5),
+                Status = OrderStatus.Processing,
+                Items =
+                {
+                    new OrderItem { ProductName = "Football Boots", Quantity = 1, UnitPrice = 179.00m },
+                    new OrderItem { ProductName = "Grip Socks", Quantity = 4, UnitPrice = 12.99m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Mohamed Salah",
+                OrderDate = DateTime.Today.AddDays(-3),
+                Status = OrderStatus.Pending,
+                Items =
+                {
+                    new OrderItem { ProductName = "Match Ball", Quantity = 2, UnitPrice = 39.99m }
+                }
+            },
+            new()
+            {
+                CustomerName = "Kevin De Bruyne",
                 OrderDate = DateTime.Today.AddDays(-1),
                 Status = OrderStatus.Pending,
                 Items =
                 {
-                    new OrderItem { ProductName = "27\" Monitor", Quantity = 2, UnitPrice = 179.99m },
-                    new OrderItem { ProductName = "HDMI Cable", Quantity = 3, UnitPrice = 7.25m }
+                    new OrderItem { ProductName = "Away Jersey", Quantity = 1, UnitPrice = 84.99m },
+                    new OrderItem { ProductName = "Shin Guards", Quantity = 1, UnitPrice = 19.95m },
+                    new OrderItem { ProductName = "Team Scarf", Quantity = 1, UnitPrice = 16.50m }
                 }
             }
         };
