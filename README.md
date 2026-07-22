@@ -9,7 +9,7 @@ orders with line items. Built for the AtDrive ASP.NET developer coding test.
 - Entity Framework Core 8 (SQL Server) for data access; schema and seed data from a plain SQL script
 - SQL Server LocalDB by default (any SQL Server works — just change the connection string)
 - jQuery / AJAX for the create-order modal
-- Cookie authentication for the secured Delete action
+- Cookie authentication securing the write actions (Create / Edit / Delete)
 - xUnit + Moq for unit tests
 
 ## Architecture
@@ -61,12 +61,13 @@ cd AtDrive
 dotnet run --project src/OrderManagement.Web
 ```
 
-Then open the URL shown in the console (e.g. https://localhost:7xxx).
+Then open the URL shown in the console (http://localhost:5077 by default; from
+Visual Studio just press F5).
 
 ### Database setup
 
 None required. On startup the app creates the empty `AtDriveOrders` database if it
-doesn't exist, then executes `Database/AtDriveOrders.sql`, which creates both tables,
+doesn't exist, then executes `src/OrderManagement.Web/Database/AtDriveOrders.sql`, which creates both tables,
 the `GetOrdersByStatus` stored procedure, and ten seeded sample orders. The script is
 idempotent, so restarts are safe; you can also run it manually against an empty
 database if you prefer.
